@@ -171,7 +171,6 @@ static int apps_startup()
 #ifdef SIGPIPE
     signal(SIGPIPE, SIG_IGN);
 #endif
-    CRYPTO_malloc_init();
     ERR_load_crypto_strings();
     ERR_load_SSL_strings();
 
@@ -310,15 +309,8 @@ int main(int argc, char *argv[])
 #endif
 
     p = getenv("OPENSSL_DEBUG_MEMORY");
-    if (p == NULL)
-        /* if not set, use compiled-in default */
-        ;
-    else if (strcmp(p, "off") != 0) {
-        CRYPTO_malloc_debug_init();
-        CRYPTO_set_mem_debug_options(V_CRYPTO_MDEBUG_ALL);
-    } else {
-        CRYPTO_set_mem_debug_functions(0, 0, 0, 0, 0);
-    }
+    if (p != NULL)
+        CRYPTO_set_mem_debug(strcmp(p, "off") == 0 ? 0 : 1);
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
     CRYPTO_set_locking_callback(lock_dbg_cb);
 
@@ -436,7 +428,9 @@ int main(int argc, char *argv[])
     BIO_free(bio_in);
     BIO_free_all(bio_out);
     apps_shutdown();
+#ifdef CRYPTO_MDEBUG
     CRYPTO_mem_leaks(bio_err);
+#endif
     BIO_free(bio_err);
     return (ret);
 }

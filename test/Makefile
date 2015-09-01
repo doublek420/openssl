@@ -30,6 +30,7 @@ LIBFIPS= -L.. -lfips
 START= @@@ START
 
 NPTEST=		nptest
+MEMLEAKTEST=    memleaktest
 BNTEST=		bntest
 ECTEST=		ectest
 ECDSATEST=	ecdsatest
@@ -82,7 +83,8 @@ ASYNCTEST=	asynctest
 
 TESTS=		alltests
 
-EXE=	$(NPTEST)$(EXE_EXT) $(BNTEST)$(EXE_EXT) $(ECTEST)$(EXE_EXT) \
+EXE=	$(NPTEST)$(EXE_EXT) $(MEMLEAKTEST)$(EXE_EXT) \
+	$(BNTEST)$(EXE_EXT) $(ECTEST)$(EXE_EXT) \
 	$(ECDSATEST)$(EXE_EXT) $(ECDHTEST)$(EXE_EXT) $(GMDIFFTEST)$(EXE_EXT) \
 	$(PBELUTEST)$(EXE_EXT) $(IDEATEST)$(EXE_EXT) \
 	$(MD2TEST)$(EXE_EXT)  $(MD4TEST)$(EXE_EXT) $(MD5TEST)$(EXE_EXT) $(HMACTEST)$(EXE_EXT) $(WPTEST)$(EXE_EXT) \
@@ -102,7 +104,8 @@ EXE=	$(NPTEST)$(EXE_EXT) $(BNTEST)$(EXE_EXT) $(ECTEST)$(EXE_EXT) \
 
 # $(METHTEST)$(EXE_EXT)
 
-OBJ=	$(NPTEST).o $(BNTEST).o $(ECTEST).o \
+OBJ=	$(NPTEST).o $(MEMLEAKTEST).o \
+	$(BNTEST).o $(ECTEST).o \
 	$(ECDSATEST).o $(ECDHTEST).o $(GMDIFFTEST).o $(PBELUTEST).o $(IDEATEST).o \
 	$(MD2TEST).o $(MD4TEST).o $(MD5TEST).o \
 	$(HMACTEST).o $(WPTEST).o \
@@ -116,7 +119,8 @@ OBJ=	$(NPTEST).o $(BNTEST).o $(ECTEST).o \
 	$(CONSTTIMETEST).o $(VERIFYEXTRATEST).o $(CLIENTHELLOTEST).o \
 	$(PACKETTEST).o $(ASYNCTEST).o testutil.o
 
-SRC=	$(NPTEST).c $(BNTEST).c $(ECTEST).c \
+SRC=	$(NPTEST).c $(MEMLEAKTEST).c \
+	$(BNTEST).c $(ECTEST).c \
 	$(ECDSATEST).c $(ECDHTEST).c $(GMDIFFTEST).c $(PBELUTEST).c $(IDEATEST).c \
 	$(MD2TEST).c  $(MD4TEST).c $(MD5TEST).c \
 	$(HMACTEST).c $(WPTEST).c \
@@ -203,6 +207,9 @@ $(RSATEST)$(EXE_EXT): $(RSATEST).o $(DLIBCRYPTO)
 
 $(NPTEST)$(EXE_EXT): $(NPTEST).o $(DLIBCRYPTO)
 	@target=$(NPTEST); $(BUILD_CMD)
+
+$(MEMLEAKTEST)$(EXE_EXT): $(MEMLEAKTEST).o $(DLIBCRYPTO)
+	@target=$(MEMLEAKTEST); $(BUILD_CMD)
 
 $(BNTEST)$(EXE_EXT): $(BNTEST).o $(DLIBCRYPTO)
 	@target=$(BNTEST); $(BUILD_CMD)
@@ -610,6 +617,11 @@ mdc2test.o: ../include/openssl/objects.h ../include/openssl/opensslconf.h
 mdc2test.o: ../include/openssl/opensslv.h ../include/openssl/ossl_typ.h
 mdc2test.o: ../include/openssl/safestack.h ../include/openssl/stack.h
 mdc2test.o: ../include/openssl/symhacks.h mdc2test.c
+memleaktest.o: ../include/openssl/bio.h ../include/openssl/crypto.h
+memleaktest.o: ../include/openssl/e_os2.h ../include/openssl/opensslconf.h
+memleaktest.o: ../include/openssl/opensslv.h ../include/openssl/ossl_typ.h
+memleaktest.o: ../include/openssl/safestack.h ../include/openssl/stack.h
+memleaktest.o: ../include/openssl/symhacks.h memleaktest.c
 nptest.o: nptest.c
 p5_crpt2_test.o: ../e_os.h ../include/openssl/asn1.h ../include/openssl/bio.h
 p5_crpt2_test.o: ../include/openssl/buffer.h ../include/openssl/conf.h

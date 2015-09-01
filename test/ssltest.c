@@ -953,6 +953,7 @@ int main(int argc, char *argv[])
     int server_auth = 0, i;
     struct app_verify_arg app_verify_arg =
         { APP_CALLBACK_STRING, 0, 0, NULL, NULL };
+    char *p;
 #ifndef OPENSSL_NO_EC
     char *named_curve = NULL;
 #endif
@@ -1003,15 +1004,9 @@ int main(int argc, char *argv[])
 
     CRYPTO_set_locking_callback(lock_dbg_cb);
 
-    /* enable memory leak checking unless explicitly disabled */
-    if (!((getenv("OPENSSL_DEBUG_MEMORY") != NULL)
-          && (0 == strcmp(getenv("OPENSSL_DEBUG_MEMORY"), "off")))) {
-        CRYPTO_malloc_debug_init();
-        CRYPTO_set_mem_debug_options(V_CRYPTO_MDEBUG_ALL);
-    } else {
-        /* OPENSSL_DEBUG_MEMORY=off */
-        CRYPTO_set_mem_debug_functions(0, 0, 0, 0, 0);
-    }
+    p = getenv("OPENSSL_DEBUG_MEMORY");
+    if (p != NULL)
+        CRYPTO_set_mem_debug(strcmp(p, "off") == 0 ? 0 : 1);
     CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
 
     RAND_seed(rnd_seed, sizeof rnd_seed);
@@ -1715,7 +1710,9 @@ int main(int argc, char *argv[])
     ERR_free_strings();
     ERR_remove_thread_state(NULL);
     EVP_cleanup();
+#ifdef CRYPTO_MDEBUG
     CRYPTO_mem_leaks(bio_err);
+#endif
     BIO_free(bio_err);
     EXIT(ret);
 }
